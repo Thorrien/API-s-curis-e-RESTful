@@ -1,6 +1,5 @@
 from django.db import models
 from django.conf import settings
-from authentication.models import Contributor
 import uuid
 
 class Project(models.Model):
@@ -19,7 +18,6 @@ class Project(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    contributors = models.ManyToManyField(Contributor, related_name='Contributeurs', blank=True)
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True, max_length=1000)
     type = models.CharField(max_length=20, choices=TYPE_PROJECTS )
@@ -64,7 +62,7 @@ class Issue(models.Model):
     description = models.TextField(blank=True, max_length=1000)
     statut = models.CharField(max_length=20, choices=STATUS_ISSUE, default=TO_DO )
     priority = models.CharField(max_length=20, choices=TYPE_PRIORITY, default=LOW )
-    worker = models.ForeignKey(Contributor, on_delete=models.SET_NULL, null=True, blank=True)
+    worker = models.ForeignKey('authentication.Contributor', on_delete=models.SET_NULL, null=True, blank=True)
     type = models.CharField(max_length=20, choices=TYPE_ISSUE )
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
 

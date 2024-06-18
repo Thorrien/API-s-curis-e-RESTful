@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from core.models import Project
 
 
 class User(AbstractUser):
@@ -9,5 +10,8 @@ class User(AbstractUser):
 
 
 class Contributor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
-
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    project = models.ForeignKey('core.Project', on_delete=models.CASCADE)  
+    
+    class Meta:
+        unique_together = ('user', 'project')
