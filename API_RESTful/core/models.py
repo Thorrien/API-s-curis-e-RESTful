@@ -14,17 +14,19 @@ class Project(models.Model):
         (IOS, 'iOS'),
         (ANDROID, 'Android'),
     ]
-    
+
     created_time = models.DateTimeField(auto_now_add=True)
     updated_time = models.DateTimeField(auto_now=True)
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     title = models.CharField(max_length=100)
     description = models.TextField(blank=True, max_length=1000)
-    type = models.CharField(max_length=20, choices=TYPE_PROJECTS )
+    type = models.CharField(max_length=20, choices=TYPE_PROJECTS)
     
+    def __str__(self):
+        return self.title
 
 class Issue(models.Model):
-    
+
     LOW = 'Faible'
     MEDIUM = 'Moyenne'
     HIGH = 'Forte'
@@ -63,8 +65,12 @@ class Issue(models.Model):
     statut = models.CharField(max_length=20, choices=STATUS_ISSUE, default=TO_DO )
     priority = models.CharField(max_length=20, choices=TYPE_PRIORITY, default=LOW )
     worker = models.ForeignKey('authentication.Contributor', on_delete=models.SET_NULL, null=True, blank=True)
-    type = models.CharField(max_length=20, choices=TYPE_ISSUE )
+    type = models.CharField(max_length=20, choices=TYPE_ISSUE)
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.title
+
 
 
 class Comment(models.Model):
