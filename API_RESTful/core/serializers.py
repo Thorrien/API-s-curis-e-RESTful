@@ -1,12 +1,18 @@
 from rest_framework.serializers import ModelSerializer, ValidationError
 from core.models import Project, Issue, Comment
 
-class ProjectSerializer(ModelSerializer):
+class ProjectDetailSerializer(ModelSerializer):
     class Meta:
         model = Project
         fields = ['id', 'created_time', 'updated_time', 'type', 'author', 'title', 'description']
-        
-        
+
+
+class ProjectSerializer(ModelSerializer):
+    class Meta:
+        model = Project
+        fields = ['id', 'updated_time', 'type', 'title']
+
+
 class IssueSerializer(ModelSerializer):
     class Meta:
         model = Issue
