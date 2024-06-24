@@ -36,7 +36,7 @@ class ProjectViewset(ModelViewSet):
 
 
 class IssueViewset(ModelViewSet):
-    permission_classes = [IsContributor]
+    permission_classes = [IsAuthenticated, IsContributor]
     serializer_class = IssueSerializer
 
     def get_queryset(self):
@@ -63,7 +63,7 @@ class PersonalIssueViewset(ModelViewSet):
     serializer_class = IssueSerializer
 
     def get_queryset(self):
-        return Issue.objects.filter(worker__user=self.request.user)
+        return Issue.objects.filter(worker__user=self.request.user).exclude(statut='Terminé')
 
     @action(detail=True, methods=['get'], permission_classes=[IsAuthenticated])
     def commentaires(self, request, pk=None):

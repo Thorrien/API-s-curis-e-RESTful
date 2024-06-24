@@ -15,7 +15,7 @@ class IsContributor(BasePermission):
 class IsUser(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return obj.id == request.user.id
+        return obj.id == request.user.id or obj.can_be_shared == True
     
 class IsOnProject(BasePermission):
 

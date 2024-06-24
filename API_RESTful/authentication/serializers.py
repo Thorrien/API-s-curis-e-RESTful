@@ -5,8 +5,7 @@ from authentication.models import User, Contributor
 class UserSerializer(ModelSerializer):    
     class Meta:
         model = User
-        fields = ['id', 'username']
-    
+        fields = ['id', 'username', 'age']
 
     def validate(self, data):
         if data['age'] < 14 :
@@ -23,4 +22,4 @@ class ContributorSerializer(ModelSerializer):
 class UserDetailSerializer(ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'username', "password", 'age', 'can_be_contacted', 'can_be_shared', 'is_active']
+        fields = ['id', 'username', 'age', 'can_be_contacted', 'can_be_shared', 'is_active']
