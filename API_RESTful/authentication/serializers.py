@@ -11,8 +11,8 @@ class UserSerializer(ModelSerializer):
         if data['age'] < 14 :
             raise ValidationError('Personne trop jeune')
         return data
-    
-    
+
+
 class ContributorSerializer(ModelSerializer):
     class Meta:
         model = Contributor
