@@ -5,12 +5,11 @@ from rest_framework.decorators import action
 
 from authentication.models import User, Contributor
 from authentication.serializers import UserSerializer, ContributorSerializer, UserDetailSerializer
-from rest_framework.permissions import IsAuthenticated
 from authentication.permissions import  IsUser, IsAdminAuthenticated
 
 class UserViewset(ModelViewSet):
 
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdminAuthenticated]
     serializer_class = UserSerializer
     detail_serializer_class = UserDetailSerializer
 
