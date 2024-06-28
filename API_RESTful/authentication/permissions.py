@@ -5,25 +5,36 @@ from authentication.models import Contributor
 class IsAdminAuthenticated(BasePermission):
 
     def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.is_staff)
+        return bool(
+            request.user and
+            request.user.is_authenticated and
+            request.user.is_staff)
 
 
 class IsContributor(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return Contributor.objects.filter(user=request.user, project=obj.project).exists()
+        return Contributor.objects.filter(
+            user=request.user,
+            project=obj.project
+            ).exists()
 
 
 class IsUser(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return obj.id == request.user.id or obj.can_be_shared == True
+        return (
+            obj.id == request.user.id or
+            obj.can_data_be_shared is True
+        )
 
 
 class IsOnProject(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return Contributor.objects.filter(user=request.user, project=obj).exists() or obj.author == request.user
+        return Contributor.objects.filter(
+            user=request.user, project=obj
+            ).exists() or obj.author == request.user
 
 
 class IsAuthor(BasePermission):
@@ -38,10 +49,14 @@ class IsAuthor(BasePermission):
 class IsOnProjectIssue(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return Contributor.objects.filter(user=request.user, project=obj.project).exists() or obj.author == request.user
+        return Contributor.objects.filter(
+            user=request.user, project=obj.project
+            ).exists() or obj.author == request.user
 
 
 class IsOnProjectComment(BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        return Contributor.objects.filter(user=request.user, project=obj.issue.project).exists() or obj.author == request.user
+        return Contributor.objects.filter(
+            user=request.user, project=obj.issue.project
+            ).exists() or obj.author == request.user
