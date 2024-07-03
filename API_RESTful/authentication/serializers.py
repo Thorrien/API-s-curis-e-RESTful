@@ -34,7 +34,7 @@ class UserDetailSerializer(ModelSerializer):
                   'username',
                   'age',
                   'can_be_contacted',
-                  'can_be_shared',
+                  'can_data_be_shared',
                   'is_active']
 
 

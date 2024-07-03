@@ -27,25 +27,20 @@ Ce projet est une API RESTful développée avec Django et Django REST Framework.
     pipenv shell
     ```
 
-4. **Installez les dépendances :**
 
-    ```bash
-    pipenv install
-    ```
-
-5. **Appliquez les migrations :**
+4. **Appliquez les migrations :**
 
     ```bash
     python manage.py migrate
     ```
 
-6. **Créez un superutilisateur :**
+5. **Créez un superutilisateur :**
 
     ```bash
     python manage.py createsuperuser
     ```
 
-7. **Lancez le serveur de développement :**
+6. **Lancez le serveur de développement :**
 
     ```bash
     python manage.py runserver
@@ -54,11 +49,6 @@ Ce projet est une API RESTful développée avec Django et Django REST Framework.
 
 ## Endpoints disponibles
 
-### Authentification :
-
-POST /api/auth/register/ : Inscription d'un nouvel utilisateur.
-POST /api/auth/login/ : Connexion d'un utilisateur.
-POST /api/auth/logout/ : Déconnexion d'un utilisateur.
 
 ### JWS Token :
 POST /api/token/ : Génération du token.
@@ -66,14 +56,14 @@ POST /api/token/ : Génération du token.
 
 ### Projets :
 
-GET /api/project/ : Liste de tous les projets pour lequel l'user est contributeur.
-POST /api/project/newprojet/ : Création d'un nouveau projet.
+GET /api/projet/ : Liste de tous les projets pour lequel l'user est contributeur.
+POST /api/projet/newprojet/ : Création d'un nouveau projet.
 
-GET /api/project/{id}/ : Détails d'un projet spécifique.
+GET /api/projet/{id}/ : Détails d'un projet spécifique.
 
-PUT /api/project/{id}/ : Mise à jour d'un projet (réservé à l'auteur du projet).
+PUT /api/projet/{id}/ : Mise à jour d'un projet (réservé à l'auteur du projet).
 
-DELETE /api/project/{id}/ : Suppression d'un projet (réservé à l'auteur du projet).
+DELETE /api/projet/{id}/ : Suppression d'un projet (réservé à l'auteur du projet).
 
 ### Tickets d'un projet:
 
@@ -105,3 +95,8 @@ PUT /api/commentaire/{comment_id}/ : Mise à jour d'un commentaire (réservé à
 
 DELETE /api/commentaire/{comment_id}/ : Suppression d'un commentaire (réservé à l'auteur du commentaire).
 
+### Todo liste :
+
+GET /api/todo/ Liste de tous les tickets accessibles par l'utilisateur dont il est le worker !
+
+GET /api/todo/{ticket_id} Détail du ticket dont il est le worker
