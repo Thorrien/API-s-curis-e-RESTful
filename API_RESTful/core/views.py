@@ -34,7 +34,7 @@ class ProjectViewset(ModelViewSet):
 
     @action(detail=False, methods=['post'],
             permission_classes=[IsAuthenticated])
-    def newprojet(self, request):
+    def project(self, request):
         data = request.data.copy()
         serializer = ProjectSerializer(data=data)
 
@@ -47,43 +47,42 @@ class ProjectViewset(ModelViewSet):
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
 
-    @action(detail=True, methods=['get'],
-            permission_classes=[IsOnProject])
-    def tickets(self, request, pk=None):
+    @action(detail=True, methods=['get', 'post'],
+                permission_classes=[IsAuthenticated, IsOnProject])
+    def issues(self, request, pk=None):
         project = self.get_object()
-        tickets = Issue.objects.filter(project=project)
-        serializer = IssueSerializer(tickets, many=True)
-        return Response(serializer.data)
+
+        if request.method == 'GET':
+            tickets = Issue.objects.filter(project=project)
+            serializer = IssueSerializer(tickets, many=True)
+            return Response(serializer.data)
+        
+        elif request.method == 'POST':
+            data = request.data.copy()
+            data['project'] = project.id
+            data['author'] = request.user.id
+            serializer = IssueSerializer(data=data)
+
+            if serializer.is_valid():
+                issue = serializer.save(author=request.user)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'],
             permission_classes=[IsOnProject])
-    def contributeurs(self, request, pk=None):
+    def contributors(self, request, pk=None):
         project = self.get_object()
         contributors = Contributor.objects.filter(project=project)
         serializer = LightContributorSerializer(contributors,
                                                 many=True)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'],
-            permission_classes=[IsAuthenticated, IsOnProject])
-    def newticket(self, request, pk=None):
-        project = self.get_object()
-        data = request.data.copy()
-        data['project'] = project.id
-        data['author'] = request.user.id
-        serializer = IssueSerializer(data=data)
-
-        if serializer.is_valid():
-            issue = serializer.save(author=request.user)
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
 
     @action(detail=True, methods=['get'],
-            url_path='tickets/(?P<ticket_pk>[^/.]+)',
+            url_path='issues/(?P<ticket_pk>[^/.]+)',
             permission_classes=[IsAuthenticated, IsOnProject])
-    def ticket_detail(self, request, pk=None, ticket_pk=None):
+    def issues_detail(self, request, pk=None, ticket_pk=None):
         project = self.get_object()
         try:
             ticket = Issue.objects.get(pk=ticket_pk, project=project)
@@ -94,50 +93,45 @@ class ProjectViewset(ModelViewSet):
         serializer = IssueSerializer(ticket)
         return Response(serializer.data)
 
-    @action(detail=True, methods=['post'],
-            url_path='tickets/(?P<ticket_pk>[^/.]+)/newcommentaire',
+    @action(detail=True, methods=['get', 'post'],
+            url_path='issues/(?P<ticket_pk>[^/.]+)/comments',
             permission_classes=[IsAuthenticated, IsOnProject])
-    def newcommentaire(self, request, pk=None, ticket_pk=None):
+    def comments(self, request, pk=None, ticket_pk=None):
         project = self.get_object()
-        try:
-            ticket = Issue.objects.get(pk=ticket_pk, project=project)
-        except Issue.DoesNotExist:
-            return Response({'detail': 'Ticket not found'},
-                            status=status.HTTP_404_NOT_FOUND)
 
-        data = request.data.copy()
-        data['issue'] = ticket.id
-        data['author'] = request.user.id
-        serializer = CommentSerializer(data=data)
+        if request.method == 'POST':
+            try:
+                ticket = Issue.objects.get(pk=ticket_pk, project=project)
+            except Issue.DoesNotExist:
+                return Response({'detail': 'Ticket not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        if serializer.is_valid():
-            user = User.objects.get(id=request.user.id)
-            comment = serializer.save(author=user, issue=ticket)
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
+            data = request.data.copy()
+            data['issue'] = ticket.id
+            data['author'] = request.user.id
+            serializer = CommentSerializer(data=data)
 
-    @action(detail=True, methods=['get'],
-            url_path='tickets/(?P<ticket_pk>[^/.]+)/commentaires',
-            permission_classes=[IsAuthenticated, IsOnProject])
-    def commentaires(self, request, pk=None, ticket_pk=None):
-        try:
-            ticket = Issue.objects.get(pk=ticket_pk, project_id=pk)
-        except Issue.DoesNotExist:
-            return Response({'detail': 'Ticket not found'},
-                            status=status.HTTP_404_NOT_FOUND)
+            if serializer.is_valid():
+                user = User.objects.get(id=request.user.id)
+                comment = serializer.save(author=user, issue=ticket)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        comments = Comment.objects.filter(issue=ticket)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
+        elif request.method == 'GET':
+            try:
+                ticket = Issue.objects.get(pk=ticket_pk, project=project)
+            except Issue.DoesNotExist:
+                return Response({'detail': 'Ticket not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            comments = Comment.objects.filter(issue=ticket)
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
 
     @action(
         detail=True, methods=['get'],
-        url_path='tickets/(?P<ticket_pk>[^/.]+)/commentaires/(?P<comment_pk>[^/.]+)',
+        url_path='issues/(?P<ticket_pk>[^/.]+)/comments/(?P<comment_pk>[^/.]+)',
         permission_classes=[IsAuthenticated, IsOnProjectIssue]
         )
-    def comment_detail(self, request, pk=None, ticket_pk=None,
+    def comments_detail(self, request, pk=None, ticket_pk=None,
                        comment_pk=None):
         try:
             comment = Comment.objects.get(pk=comment_pk,
@@ -225,13 +219,33 @@ class PersonalIssueViewset(ModelViewSet):
             worker__user=self.request.user
             ).exclude(statut='Terminé')
 
-    @action(detail=True, methods=['get'],
+    @action(detail=True, methods=['get', 'post'],
+            url_path='comments',
             permission_classes=[IsAuthenticated])
-    def commentaires(self, request, pk=None):
+    def comments(self, request, pk=None):
         issue = self.get_object()
-        comments = Comment.objects.filter(issue=issue)
-        serializer = CommentSerializer(comments, many=True)
-        return Response(serializer.data)
+
+        if request.method == 'GET':
+            comments = Comment.objects.filter(issue=issue)
+            serializer = CommentSerializer(comments, many=True)
+            return Response(serializer.data)
+
+        elif request.method == 'POST':
+            try:
+                ticket = Issue.objects.get(pk=pk, worker__user=self.request.user)
+            except Issue.DoesNotExist:
+                return Response({'detail': 'Ticket not found'}, status=status.HTTP_404_NOT_FOUND)
+
+            data = request.data.copy()
+            data['issue'] = ticket.id
+            data['author'] = request.user.id
+            serializer = CommentSerializer(data=data)
+
+            if serializer.is_valid():
+                user = User.objects.get(id=request.user.id)
+                comment = serializer.save(author=user, issue=ticket)
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get_serializer_class(self):
         if self.action == 'retrieve':
@@ -245,34 +259,8 @@ class PersonalIssueViewset(ModelViewSet):
             self.permission_classes = [IsAdminAuthenticated]
         return super().get_permissions()
 
-    @action(detail=True, methods=['post'],
-            url_path='newcommentaire',
-            permission_classes=[IsAuthenticated, IsOnProject])
-    def newcommentaire(self, request, pk=None):
-        try:
-            ticket = Issue.objects.get(
-                pk=pk,
-                worker__user=self.request.user
-                )
-        except Issue.DoesNotExist:
-            return Response({'detail': 'Ticket not found'},
-                            status=status.HTTP_404_NOT_FOUND)
-
-        data = request.data.copy()
-        data['issue'] = ticket.id
-        data['author'] = request.user.id
-        serializer = CommentSerializer(data=data)
-
-        if serializer.is_valid():
-            user = User.objects.get(id=request.user.id)
-            comment = serializer.save(author=user, issue=ticket)
-            return Response(serializer.data,
-                            status=status.HTTP_201_CREATED)
-        return Response(serializer.errors,
-                        status=status.HTTP_400_BAD_REQUEST)
-
     @action(detail=True, methods=['get'],
-            url_path='commentaires/(?P<comment_pk>[^/.]+)',
+            url_path='comments/(?P<comment_pk>[^/.]+)',
             permission_classes=[IsAuthenticated, IsOnProjectIssue])
     def comment_detail(self, request, pk=None, comment_pk=None):
         ticket = self.get_object()

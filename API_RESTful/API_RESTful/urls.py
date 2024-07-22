@@ -15,11 +15,11 @@ from core.views import ProjectViewset, IssueViewset, CommentViewset, PersonalIss
 router = routers.SimpleRouter()
 
 router.register('user', UserViewset, basename='user')
-router.register('projet', ProjectViewset, basename='projet')
-router.register('contributeur', ContributorViewset, basename='contributeur')
-router.register('ticket', IssueViewset, basename='ticket')
+router.register('project', ProjectViewset, basename='project')
+router.register('contributor', ContributorViewset, basename='contributor')
+router.register('issue', IssueViewset, basename='issue')
 router.register('todo', PersonalIssueViewset, basename='todo')
-router.register('commentaire', CommentViewset, basename='commentaire')
+router.register('comment', CommentViewset, basename='comment')
 
 
 urlpatterns = [
